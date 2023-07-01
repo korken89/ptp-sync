@@ -1,8 +1,12 @@
+% High DPI fixes, comment if not needed
 set(0, "defaulttextfontsize", 32)  % title
 set(0, "defaultaxesfontsize", 24)  % axes labels
-
 set(0, "defaultlinelinewidth", 2)
 
+% We need the `control` package, install with
+% ```
+% pkg install "https://github.com/gnu-octave/pkg-control/releases/download/control-3.6.0/control-3.6.0.tar.gz"
+% ```
 pkg load control;
 
 
@@ -41,6 +45,10 @@ sigma = 0.2;
 b0 = brownian_motion(N, dt, c, sigma);
 b1 = brownian_motion(N, dt, c, sigma);
 
+%
+% Kalman filter
+%
+
 % Acceleration model
 e = [0; 0; 0];
 all_e = e;
@@ -70,6 +78,10 @@ R = 1000
 
 S = eC * P * eC' + R
 
+
+%
+% Start estimation
+%
 
 for i = 1:N
     b_mul = 1 + b0(i)/1e6;
