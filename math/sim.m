@@ -38,8 +38,7 @@ all_x1 = x1;
 %
 % Add some Brownian motion
 %
-c = 0.9995
-
+c = 0.9995;
 sigma = 0.2;
 
 b0 = brownian_motion(N, dt, c, sigma);
@@ -80,8 +79,29 @@ S = eC * P * eC' + R
 
 
 %
+% LQR
+%
+
+lF = [1 dt;
+      0  1];
+
+lB = [dt; 1];
+
+lQ = [1 0;
+      0 1];
+
+lR = 100;
+
+[g] = dlqr (lF, lB, lQ, lR)
+
+u = [0];
+all_u = u;
+
+%
 % Start estimation
 %
+
+u = 0;
 
 for i = 1:N
     b_mul = 1 + b0(i)/1e6;
@@ -103,10 +123,14 @@ for i = 1:N
     all_x1 = [all_x1, x1];
 
     % Est
-    e = eF * e;
+    e = eF * e ;
     err = x0(1) - x1(1);
     e = e +  K * (err - eC * e);
     all_e = [all_e, e];
+
+    % Control
+    u = -g*e(1:2);
+    all_u = [all_u, u];
 end
 
 
@@ -138,9 +162,13 @@ legend('True tick rate','Estimated tick rate')
 
 figure
 
-plot(all_e(3, :));
-title('Estimated acceleration (ticks)')
+plot(t, all_e(3, :));
+hold on;
+plot(t, all_u);
+hold off;
+title('Estimated acceleration and control acceleration (ticks)')
 grid on;
+legend('Estimated acceleration','Control acceleration')
 
 % Plot estimation error
 figure
