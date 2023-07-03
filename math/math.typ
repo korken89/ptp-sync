@@ -11,10 +11,10 @@
 
 Here are the notes for the PTP time sync.
 
-= Clock modelling
+= Clock modeling
 
-A clock can be represented as an autonomouse system with a tick count $T$ and tick rate $accent(T,dot)$.
-The tickrate of the clock, $accent(T,dot)$, is bounded to a nominal value that is scaled with an unknown error.
+A clock can be represented as an autonomous system with a tick count $T$ and tick rate $accent(T,dot)$.
+The tick rate of the clock, $accent(T,dot)$, is bounded to a nominal value that is scaled with an unknown error.
 
 $ accent(T,dot) = (1+epsilon) accent(T,dot)_("nom") $
 
@@ -23,7 +23,7 @@ The characteristics of $epsilon$ is generally temperature and voltage dependent,
 
 $ accent(epsilon,dot) = -alpha epsilon + cal(N)(0, sigma^2)  $
 
-This will give a clock that has a nominal tick rate but that slowly drifts around the nominal value. The nominal tick rate for a the PTP peripheral in STM32 microcontrollers is $2^32$ which is accumulated in a 64-bit register, this means that overflows can be neglected as this would overflow about once every 136 years.
+This will give a clock that has a nominal tick rate but that slowly drifts around the nominal value. The nominal tick rate for the PTP peripheral in STM32 microcontrollers is $2^32$ which is accumulated in a 64-bit register, this means that overflows can be neglected as this would overflow about once every 136 years.
 
 Combining the above gives the system's transfer function is as follows:
 
@@ -53,7 +53,7 @@ $ y_m = T^C - T^A + w $
 
 where $w$ is some measurement noise. This means that we need to find the dynamics model of the clock offset instead of individual clocks.
 
-= Offset modelling
+= Offset modeling
 
 From the offset
 
@@ -90,7 +90,7 @@ $ vec(T^O, accent(T, dot)^O) -> vec(0,0). $
 = Estimating offset
 
 We can estimate the current offset and its derivative using a Kalman filter, however the question is what model should we use for the estimator?
-As the underlying drivers for the random walk is mostly temperature, this means that changes in temperature will cause an increase or decrease in tick rate. Moreover we can assume that the change in tick rate is continous. This indicates that either a velocity model or acceleration model should be a good fit for the problem.
+As the underlying drivers for the random walk is mostly temperature, this means that changes in temperature will cause an increase or decrease in tick rate. Moreover we can assume that the change in tick rate is continuous. This indicates that either a velocity model or acceleration model should be a good fit for the problem.
 
 Lets start with an acceleration model using the following state space model:
 
