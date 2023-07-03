@@ -1,22 +1,17 @@
-function motion = brownian_motion(N, dt, c, sigma)
+function motion = brownian_motion(N, dt, c, sigma, ppm_limit)
 
     b = 0;
 
-    all_b = zeros(N+1, 1);
-
-    lpf = 0;
-    alpha = 0.9999;
+    all_b = zeros(N, 1);
 
     for i = 1:N
-
         % Brownian motion
-        lpf = alpha * lpf + (1 - alpha) * sigma * sqrt(dt) * randn;
+        b = c * b + sigma * sqrt(dt) * randn;
 
-        b = c * b + lpf;
-
-        all_b(i+1) = b;
+        all_b(i) = b;
     end
 
-    motion = all_b;
+    base_ppm = 2*ppm_limit * rand - ppm_limit
+    motion = all_b + base_ppm;
 end
 

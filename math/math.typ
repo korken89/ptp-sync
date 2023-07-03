@@ -43,6 +43,16 @@ vec(accent(T,dot), accent(epsilon,dot)) =
     + vec(0, cal(N)(0, sigma^2))
 $
 
+It's important to understand that $accent(T,dot)_("nom")$ can differ between two clocks using the same crystal due to manufacturing tolerances. As an example, below is a simulation over the Brownian motion of two clocks that includes these manufacturing tolerances.
+
+#figure(
+  image("brownian.svg", width: 95%),
+  caption: [
+    The simulated frequency error of two clocks.
+  ],
+)
+
+
 = Measurements
 
 In PTP we have two clocks that we want to synchronize, one that we can control $T^C$, and some other autonomous clock $T^A$. While we can observe a timestamp from either clock we can't make an observation at the same time due to time delays to send timestamps and reading them out.

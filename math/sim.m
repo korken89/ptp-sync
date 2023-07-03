@@ -1,7 +1,9 @@
 % High DPI fixes, comment if not needed
-set(0, "defaulttextfontsize", 32)  % title
-set(0, "defaultaxesfontsize", 24)  % axes labels
-set(0, "defaultlinelinewidth", 2)
+set(0, "defaulttextfontsize", 38)  % title
+set(0, "defaultaxesfontsize", 32)  % axes labels
+set(0, "defaultlinelinewidth", 4)
+
+rng(1)
 
 % We need the `control` package, install with
 % ```
@@ -32,17 +34,18 @@ tdot2 = 2^32; % starting tick rate for second clock
 x0 = [t0; tdot1];
 x1 = [t1; tdot2];
 
-all_x0 = x0;
-all_x1 = x1;
+all_x0 = [];
+all_x1 = [];
 
 %
 % Add some Brownian motion
 %
 c = 0.9995;
-sigma = 0.2;
+sigma = 0.05;
+ppm = 5;
 
-b0 = brownian_motion(N, dt, c, sigma);
-b1 = brownian_motion(N, dt, c, sigma);
+b0 = brownian_motion(N, dt, c, sigma, ppm);
+b1 = brownian_motion(N, dt, c, sigma, ppm);
 
 %
 % Kalman filter
@@ -50,7 +53,7 @@ b1 = brownian_motion(N, dt, c, sigma);
 
 % Acceleration model
 e = [0; 0; 0];
-all_e = e;
+all_e = [];
 
 eF = [1 dt dt^2/2; 0 1 dt; 0 0 1];
 
@@ -88,14 +91,14 @@ lF = [1 dt;
 lB = [dt; 1];
 
 lQ = [1 0;
-      0 1];
+      0 0];
 
 lR = 100;
 
 [g] = dlqr (lF, lB, lQ, lR)
 
 u = [0];
-all_u = u;
+all_u = [];
 
 %
 % Start estimation
@@ -137,13 +140,15 @@ end
 % Plotting
 figure
 
-t = linspace(0, dt*N, N+1);
+t = linspace(0, dt*N, N);
 
+% plot start
+ps = 200;
 
 subplot(2,1,1);
-plot(t, all_x0(1, :) - all_x1(1, :));
+plot(t(ps:end), all_x0(1, ps:end) - all_x1(1, ps:end));
 hold on;
-plot(t, all_e(1, :));
+plot(t(ps:end), all_e(1, ps:end));
 hold off;
 
 title('Difference (offset) of the 2 clocks (clock 0 - clock 1)')
@@ -151,9 +156,9 @@ grid on;
 legend('True offset','Estimated offset')
 
 subplot(2,1,2);
-plot(t, all_x0(2, :) - all_x1(2, :));
+plot(t(ps:end), all_x0(2, ps:end) - all_x1(2, ps:end));
 hold on;
-plot(t, all_e(2, :));
+plot(t(ps:end), all_e(2, ps:end));
 hold off;
 
 title('Difference (tick rate) of the 2 clocks')
@@ -162,9 +167,9 @@ legend('True tick rate','Estimated tick rate')
 
 figure
 
-plot(t, all_e(3, :));
+plot(t(ps:end), all_e(3, ps:end));
 hold on;
-plot(t, all_u);
+plot(t(ps:end), all_u(ps:end));
 hold off;
 title('Estimated acceleration and control acceleration (ticks)')
 grid on;
@@ -173,26 +178,34 @@ legend('Estimated acceleration','Control acceleration')
 % Plot estimation error
 figure
 
+ns_scale = 1e9/2^32;
+
 subplot(2,1,1);
-plot(t, all_e(1, :) - (all_x0(1, :) - all_x1(1, :)));
-title('Error Estimated offset (ticks)')
+plot(t(ps:end), (all_e(1, ps:end) - (all_x0(1, ps:end) - all_x1(1, ps:end))) * ns_scale);
+title('Error in estimated offset')
 grid on;
+xlabel('Time [s]')
+ylabel('Offset error [ns]')
 
 subplot(2,1,2);
-plot(t, all_e(2, :) - (all_x0(2, :) - all_x1(2, :)));
-title('Error Estimated offset speed (tick rate)')
+plot(t(ps:end), (all_e(2, ps:end) - (all_x0(2, ps:end) - all_x1(2, ps:end))) * ns_scale);
+title('Error in estimated tick rate')
 grid on;
+xlabel('Time [s]')
+ylabel('Tick rate error [ns/s]')
 
 
 figure;
 
-plot(t, b0);
+plot(t(ps:20:end), b0(ps:20:end));
 hold on;
-plot(t, b1);
+plot(t(ps:20:end), b1(ps:20:end));
 hold off;
 
-title('The 2 Brownian motions')
+title('Brownian motion for two clocks')
+xlabel('Time [s]')
+ylabel('Tick rate deviation [ppm]')
 grid on;
-legend('Motion for Clock 0','Motion for Clock 1')
+legend('Error for clock 1','Error for clock 2')
 
 pause;
