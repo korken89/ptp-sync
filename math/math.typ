@@ -84,18 +84,25 @@ $
 
 This shows, as both $epsilon^C$ and $epsilon^A$ are random walk processes, that the offset will drift over time if no control action is supplied from $u$. Moreover, the bound on the drift is double that of each individual clock.
 
+Finally, replacing the difference of Brownian motion into a new random walk process $epsilon^O$ gives the following system that we want to control:
+
+$
+vec(accent(T, dot)^O, accent(epsilon, dot)^O) = mat(0, 1; 0, -alpha) vec(T^O, epsilon^O)
+ + vec(u, 0) + vec(0, cal(N)(0, 2 sigma^2))
+$
+
 = Control aim
 
 The main reason for offset drift is that the effects from the random walk processes cannot be eliminated, hence a controller is needed.
-Given that we can estimate $T^O$ and $accent(T, dot)^O$, we can formulate a state feedback regulator that drives these states to 0.
+Given that we can estimate $T^O$ and $epsilon^O$, we can formulate a state feedback regulator that drives the offset to 0.
 
 That is, find a state feedback controller
 
-$ u = -g dot vec(T^O, accent(T, dot)^O) $
+$ u = -g dot vec(T^O, epsilon^O) $
 
 such that
 
-$ vec(T^O, accent(T, dot)^O) -> vec(0,0). $
+$ T^O -> 0. $
 
 = Estimating offset
 
