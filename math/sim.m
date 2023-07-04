@@ -1,6 +1,6 @@
 % High DPI fixes, comment if not needed
-set(0, "defaulttextfontsize", 38)  % title
-set(0, "defaultaxesfontsize", 32)  % axes labels
+set(0, "defaulttextfontsize", 32)  % title
+set(0, "defaultaxesfontsize", 26)  % axes labels
 set(0, "defaultlinelinewidth", 4)
 
 rng(1)
@@ -75,7 +75,7 @@ Q = [dt^5/20 dt^4/8 dt^3/6;
 %     dt^2/2 dt];
 
 
-R = 1000
+R = 4000
 [K, P] = dlqe (eF, [], eC, Q, R)
 
 S = eC * P * eC' + R
@@ -144,22 +144,28 @@ t = linspace(0, dt*N, N);
 
 % plot start
 ps = 200;
+step = 20;
+
+ns_scale = 1e9/2^32;
 
 subplot(2,1,1);
-plot(t(ps:end), all_x0(1, ps:end) - all_x1(1, ps:end));
+plot(t(ps:step:end), all_x0(1, ps:step:end) - all_x1(1, ps:step:end));
 hold on;
-plot(t(ps:end), all_e(1, ps:end));
+plot(t(ps:step:end), all_e(1, ps:step:end));
 hold off;
+ylabel('Offset')
 
 title('Difference (offset) of the 2 clocks (clock 0 - clock 1)')
 grid on;
 legend('True offset','Estimated offset')
 
 subplot(2,1,2);
-plot(t(ps:end), all_x0(2, ps:end) - all_x1(2, ps:end));
+plot(t(ps:step:end), all_x0(2, ps:step:end) - all_x1(2, ps:step:end));
 hold on;
-plot(t(ps:end), all_e(2, ps:end));
+plot(t(ps:step:end), all_e(2, ps:step:end));
 hold off;
+xlabel('Time [s]')
+ylabel('Tick rate')
 
 title('Difference (tick rate) of the 2 clocks')
 grid on;
@@ -167,28 +173,24 @@ legend('True tick rate','Estimated tick rate')
 
 figure
 
-plot(t(ps:end), all_e(3, ps:end));
-hold on;
-plot(t(ps:end), all_u(ps:end));
-hold off;
-title('Estimated acceleration and control acceleration (ticks)')
+plot(t(ps:step:end), all_e(3, ps:step:end) * ns_scale);
+title('Estimated acceleration')
 grid on;
-legend('Estimated acceleration','Control acceleration')
+xlabel('Time [s]')
+ylabel('Acceleration error [ns/s^2]')
 
 % Plot estimation error
 figure
 
-ns_scale = 1e9/2^32;
 
 subplot(2,1,1);
-plot(t(ps:end), (all_e(1, ps:end) - (all_x0(1, ps:end) - all_x1(1, ps:end))) * ns_scale);
+plot(t(ps:step:end), (all_e(1, ps:step:end) - (all_x0(1, ps:step:end) - all_x1(1, ps:step:end))) * ns_scale);
 title('Error in estimated offset')
 grid on;
-xlabel('Time [s]')
 ylabel('Offset error [ns]')
 
 subplot(2,1,2);
-plot(t(ps:end), (all_e(2, ps:end) - (all_x0(2, ps:end) - all_x1(2, ps:end))) * ns_scale);
+plot(t(ps:step:end), (all_e(2, ps:step:end) - (all_x0(2, ps:step:end) - all_x1(2, ps:step:end))) * ns_scale);
 title('Error in estimated tick rate')
 grid on;
 xlabel('Time [s]')
@@ -197,9 +199,9 @@ ylabel('Tick rate error [ns/s]')
 
 figure;
 
-plot(t(ps:20:end), b0(ps:20:end));
+plot(t(ps:step:end), b0(ps:step:end));
 hold on;
-plot(t(ps:20:end), b1(ps:20:end));
+plot(t(ps:step:end), b1(ps:step:end));
 hold off;
 
 title('Brownian motion for two clocks')

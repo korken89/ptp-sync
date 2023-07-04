@@ -117,3 +117,31 @@ vec(T^O, accent(T, dot)^O, accent(T, dot.double)^O)_k + cal(N)(0, R)
 $
 
 == Simulation results (acceleration model)
+
+#figure(
+  image("acc_model/brownian.svg", width: 95%),
+  caption: [
+    The simulated frequency error of the two clocks.
+  ],
+)
+
+#figure(
+  image("acc_model/tracking.svg", width: 95%),
+  caption: [
+    The tracking of the Kalman filter overlayed with true values.
+  ],
+)
+
+#figure(
+  image("acc_model/error.svg", width: 95%),
+  caption: [
+    The tracking error of the Kalman filter.
+  ],
+)
+
+#figure(
+  image("acc_model/acc_est.svg", width: 95%),
+  caption: [
+    The estimated acceleration of the Kalman filter.
+  ],
+)
