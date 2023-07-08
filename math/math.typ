@@ -43,7 +43,7 @@ vec(accent(T,dot), accent(epsilon,dot)) =
     + vec(0, cal(N)(0, sigma^2))
 $
 
-It's important to understand that $accent(T,dot)_("nom")$ can differ between two clocks using the same crystal due to manufacturing tolerances. As an example, below is a simulation over the Brownian motion of two clocks that includes these manufacturing tolerances.
+It's important to understand that $accent(T,dot)_("nom")$ can differ between two clocks using the same crystal due to manufacturing tolerances. As an example, below is a simulation over the Brownian motion of two clocks that includes these manufacturing tolerances. However one can move this error into $epsilon$ without issues.
 
 #figure(
   image("brownian.svg", width: 95%),
@@ -91,6 +91,15 @@ vec(accent(T, dot)^O, accent(epsilon, dot)^O) = mat(0, 1; 0, -alpha) vec(T^O, ep
  + vec(u, 0) + vec(0, cal(N)(0, 2 sigma^2))
 $
 
+However here an interesting question about our modeling comes into light. What are the actual dynamics of $epsilon^O$? Our modeling suggests that its dynamics are driven by something unknown, however in reality this will be driven mainly by temperature fluctuations and aging of the underlying clock. Both which are not random processes. This means that there are most likely hidden dynamics we have not modeled here. Now one can either go down the rabbit hole and try to model these, or go with the assumption that estimating another derivative will capture enough of the dynamics. This would give the following system:
+
+$
+vec(accent(T, dot)^O, accent(epsilon, dot)^O, accent(epsilon, dot.double)^O) = mat(0, 1, 0; 0, 0, 1; 0, 0, 0) vec(T^O, epsilon^O, accent(epsilon, dot)^O)
+ + vec(u, 0, 0) + vec(0, 0, cal(N)(0, sigma^2))
+$
+
+We'll explore both and compare estimation errors.
+
 = Control aim
 
 The main reason for offset drift is that the effects from the random walk processes cannot be eliminated, hence a controller is needed.
@@ -98,30 +107,43 @@ Given that we can estimate $T^O$ and $epsilon^O$, we can formulate a state feedb
 
 That is, find a state feedback controller
 
-$ u = -g dot vec(T^O, epsilon^O) $
+$ u = -g dot vec(T^O, epsilon^O, accent(epsilon, dot)^O) $
 
 such that
 
 $ T^O -> 0. $
 
+Looking at the dynamics we can by inspection see that the full state space is uncontrollable, as the control signal has no interaction with any $epsilon^O$ states. However as we only want to control $T^O$ we can see that this state is indeed controllable. Which is good, else this would have all been a waste of time.
+
 = Estimating offset
 
-We can estimate the current offset and its derivative using a Kalman filter, however the question is what model should we use for the estimator?
-As the underlying drivers for the random walk is mostly temperature, this means that changes in temperature will cause an increase or decrease in tick rate. Moreover we can assume that the change in tick rate is continuous. This indicates that either a velocity model or acceleration model should be a good fit for the problem.
+We can estimate the current offset and the $epsilon$ states using a Kalman filter.
 
-Lets start with an acceleration model using the following state space model:
+Lets start with the extended model model using the following discrete state space model:
 
 $
-vec(T^O, accent(T, dot)^O, accent(T, dot.double)^O)_(k+1) =
-mat(1, Delta t, Delta t^2/2; 0, 1, Delta t; 0, 0, 1)
-vec(T^O, accent(T, dot)^O, accent(T, dot.double)^O)_k +
-vec(0, u_k, 0) + cal(N)(0, bold(Q))
+vec(T^O, epsilon^O, accent(epsilon, dot)^O)_(k+1) =
+mat(1, Delta t, (Delta t^2)/2; 0, 1, Delta t; 0, 0, 1)
+vec(T^O, epsilon^O, accent(epsilon, dot)^O)_k +
+vec(Delta t, 0, 0) u_k + cal(N)(0, bold(Q))
 $
 
 $
 y_k = mat(1, 0, 0)
-vec(T^O, accent(T, dot)^O, accent(T, dot.double)^O)_k + cal(N)(0, R)
+vec(T^O, epsilon^O, accent(epsilon, dot)^O)_k + cal(N)(0, R)
 $
+
+Where the process covariance matrix is:
+
+$
+bold(Q) = mat((Delta t^5)/20, (Delta t^4)/8, (Delta t^3)/6;
+              (Delta t^4)/8,  (Delta t^3)/6, (Delta t^2)/2;
+              (Delta t^3)/6,  (Delta t^2)/2,  Delta t) sigma^2
+$
+
+and $R$ is determined by measurement noise from a data set. Finally, the aggressiveness of the model can be tuned by varying $sigma$, until desired responsiveness is found on a collected data set.
+
+To reject outliers a Mahalanobis gating test will be added, it's simple but effective. However it's not suitable for initial convergence. Even more so, a Kalman Filter needs help with initial convergence to get good startup performance. Hence the initial $T^O$ and $epsilon^O$ will be estimated using least squares on a small initial sample set.
 
 == Simulation results (acceleration model)
 
