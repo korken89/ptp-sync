@@ -100,21 +100,6 @@ $
 
 We'll explore both and compare estimation errors.
 
-= Control aim
-
-The main reason for offset drift is that the effects from the random walk processes cannot be eliminated, hence a controller is needed.
-Given that we can estimate $T^O$ and $epsilon^O$, we can formulate a state feedback regulator that drives the offset to 0.
-
-That is, find a state feedback controller
-
-$ u = -g dot vec(T^O, epsilon^O, accent(epsilon, dot)^O) $
-
-such that
-
-$ T^O -> 0. $
-
-Looking at the dynamics we can by inspection see that the full state space is uncontrollable, as the control signal has no interaction with any $epsilon^O$ states. However as we only want to control $T^O$ we can see that this state is indeed controllable. Which is good, else this would have all been a waste of time.
-
 = Estimating offset
 
 We can estimate the current offset and the $epsilon$ states using a Kalman filter.
@@ -144,6 +129,23 @@ $
 and $R$ is determined by measurement noise from a data set. Finally, the aggressiveness of the model can be tuned by varying $sigma$, until desired responsiveness is found on a collected data set.
 
 To reject outliers a Mahalanobis gating test will be added, it's simple but effective. However it's not suitable for initial convergence. Even more so, a Kalman Filter needs help with initial convergence to get good startup performance. Hence the initial $T^O$ and $epsilon^O$ will be estimated using least squares on a small initial sample set.
+
+= Control aim
+
+The main reason for offset drift is that the effects from the random walk processes cannot be eliminated, hence a controller is needed.
+Given that we can estimate $T^O$ and $epsilon^O$, we can formulate a state feedback regulator that drives the offset to 0.
+
+That is, find a state feedback controller
+
+$ u = -g dot vec(T^O, epsilon^O, accent(epsilon, dot)^O) $
+
+such that
+
+$ T^O -> 0. $
+
+Looking at the dynamics we can by inspection see that the full state space is uncontrollable, as the control signal has no interaction with any $epsilon^O$ states. However as we only want to control $T^O$ we can see that this state is indeed controllable. Which is good, else this would have all been a waste of time.
+
+To make this work with available LQR methodologies (Octave/Matlab) we need to have a controllable system. To get this we need to eliminate the uncontrollable state.
 
 == Simulation results (acceleration model)
 

@@ -61,7 +61,7 @@ eC = [1, 0, 0];
 
 Q = [dt^5/20 dt^4/8 dt^3/6;
     dt^4/8 dt^3/6 dt^2/2;
-    dt^3/6 dt^2/2 dt];
+    dt^3/6 dt^2/2 dt] * 1;
 
 % Velocity only model
 % e = [0; 0];
@@ -75,7 +75,7 @@ Q = [dt^5/20 dt^4/8 dt^3/6;
 %     dt^2/2 dt];
 
 
-R = 4000
+R = 4000 % About 1us
 [K, P] = dlqe (eF, [], eC, Q, R)
 
 S = eC * P * eC' + R
@@ -85,13 +85,15 @@ S = eC * P * eC' + R
 % LQR
 %
 
-lF = [1 dt;
-      0  1];
+% lF = [1 dt;
+%       0  1];
+lF = [1 dt dt^2/2; 0 1 dt; 0 0 1];
 
-lB = [dt; 1];
+lB = [dt; 0; 0];
 
-lQ = [1 0;
-      0 0];
+lQ = [1 0 0;
+      0 0 0;
+      0 0 0];
 
 lR = 100;
 
