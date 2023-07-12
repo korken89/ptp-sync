@@ -137,7 +137,7 @@ Given that we can estimate $T^O$ and $epsilon^O$, we can formulate a state feedb
 
 That is, find a state feedback controller
 
-$ u = -g dot vec(T^O, epsilon^O, accent(epsilon, dot)^O) $
+$ u = -bold(g) dot vec(T^O, epsilon^O, accent(epsilon, dot)^O) $
 
 such that
 
@@ -145,7 +145,29 @@ $ T^O -> 0. $
 
 Looking at the dynamics we can by inspection see that the full state space is uncontrollable, as the control signal has no interaction with any $epsilon^O$ states. However as we only want to control $T^O$ we can see that this state is indeed controllable. Which is good, else this would have all been a waste of time.
 
-To make this work with available LQR methodologies (Octave/Matlab) we need to have a controllable system. To get this we need to eliminate the uncontrollable state.
+To make this work with available LQR methodologies (Octave/Matlab) we need to have a controllable system, and to this end we need to eliminate the uncontrollable state. In our case this will be trivial by looking at the evolution of $T^O_k$:
+
+$ T^O_k = T^O_(k+1) + Delta t epsilon^O_k + (Delta t^2)/2 accent(epsilon, dot)^O_k + Delta t u_k $
+
+Lets rearrange:
+
+$ T^O_k = T^O_(k+1) + Delta t (epsilon^O_k + (Delta t)/2 accent(epsilon, dot)^O_k + u_k) $
+
+And define a new control signal:
+
+$ accent(u, tilde)_k = epsilon^O_k + (Delta t)/2 accent(epsilon, dot)^O_k + u_k $
+
+This will give us a new state space system of a single dimension:
+
+$ T^O_(k+1) = T^O_k + Delta t accent(u, tilde)_k $
+
+where the inverse transform of the control signal is
+
+$ u_k = accent(u, tilde)_k - epsilon^O_k - (Delta t)/2 accent(epsilon, dot)^O_k. $
+
+This is also logical as with this controls signal tranformation eliminate the uncontrolable states. Finally we can apply LQR methodologies to control the system, i.e. the first element in $bold(g)$, where the final $bold(g)$ will be:
+
+$ bold(g) = mat(g_0, epsilon^O_k, (Delta t)/2 accent(epsilon, dot)^O_k). $
 
 == Simulation results (acceleration model)
 
