@@ -165,9 +165,39 @@ where the inverse transform of the control signal is
 
 $ u_k = accent(u, tilde)_k - epsilon^O_k - (Delta t)/2 accent(epsilon, dot)^O_k. $
 
-This is also logical as with this controls signal tranformation eliminate the uncontrolable states. Finally we can apply LQR methodologies to control the system, i.e. the first element in $bold(g)$, where the final $bold(g)$ will be:
+This is also logical as with this controls signal tranformation eliminate the uncontrolable states. Finally we can apply the LQR methodology to control the system, i.e. find the first element in $bold(g)$, where the final $bold(g)$ will be:
 
-$ bold(g) = mat(g_0, epsilon^O_k, (Delta t)/2 accent(epsilon, dot)^O_k). $
+$ bold(g) = mat(g_0, 1, (Delta t)/2). $
+
+To find $g_0$ we need to solve the Discrete Algebraic Riccatti Equation by finding $P$ in:
+
+$
+P = A P A^T - (A^T P B)(R + B^T P B)^(-1)(B^T P A) + Q
+$
+
+and finally find $g_0$ as
+
+$
+g_0 = (R + B^T P B)^(-1) B^T P A
+$
+
+where $A = 1$ and $B = Delta t$. Solving for the positive definite form of $P$ (it has 2 solutions) gives:
+
+$
+P = Q/2 + sqrt(Q^2/4 + (R Q)/t^2).
+$
+
+Which gives $g_0$ as follows:
+
+$
+g_0 = frac(sqrt(Q^2 Delta t^2 + 4 R Q) + Q Delta t, 2R + Delta t (sqrt(Q^2 Delta t^2 + 4 R Q) + Q Delta t)),
+$
+
+and the final state feedback gain as:
+
+$
+bold(g) = mat(frac(sqrt(Q^2 Delta t^2 + 4 R Q) + Q Delta t, 2R + Delta t (sqrt(Q^2 Delta t^2 + 4 R Q) + Q Delta t)), 1, (Delta t)/2).
+$
 
 == Simulation results (acceleration model)
 
